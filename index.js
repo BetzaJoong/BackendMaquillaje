@@ -8,12 +8,20 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// const pool = new Pool({
+//     user: process.env.DB_USER,
+//     host: process.env.DB_HOST,
+//     database: process.env.DB_DATABASE,
+//     password: process.env.DB_PASSWORD,
+//     port: process.env.DB_PORT,
+// });
+
+
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 app.use(express.json());
@@ -58,7 +66,7 @@ app.post('/iniciarsesion', async (req, res) => {
         if (!validPassword) {
             return res.status(401).send('Contraseña incorrecta');
         }
-        
+
         // Generar token de acceso
         const token = jwt.sign({ email: user.rows[0].email, rol: user.rows[0].rol }, process.env.JWT_SECRET);
 
@@ -78,7 +86,7 @@ app.get('/perfil', async (req, res) => {
         if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
             return res.status(401).json({ message: 'Token de autenticación no proporcionado' });
         }
-        
+
         // Extraer el token del encabezado de autorización
         const token = req.headers.authorization.split(' ')[1];
 
@@ -104,7 +112,7 @@ app.get('/perfil', async (req, res) => {
         if (error.name === 'TokenExpiredError') {
             return res.status(401).json({ message: 'Token de autenticación expirado' });
         }
-        
+
         // Manejar otros errores
         console.error('Error al obtener perfil de usuario:', error.message);
         res.status(500).send('Error del servidor al obtener perfil de usuario');
@@ -125,7 +133,7 @@ app.get('/adminusuario', async (req, res) => {
 
         // Verificar y decodificar el token para obtener el usuario
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        
+
         // Verificar si el usuario tiene rol de administrador
         if (decoded.rol !== 'admin') {
             return res.status(403).json({ message: 'Acceso denegado. Este endpoint es solo para administradores' });
@@ -152,6 +160,12 @@ app.get('/usuarios', async (req, res) => {
         res.status(500).send('Error del servidor al obtener usuarios');
     }
 });
+
+//____Conexión con RENDER___
+app.get('/ping', async (req, res) => {
+    const result = await pool.query('SELECT NOW()')
+    return res.json(result.rows[0])
+})
 
 app.listen(PORT, () => {
     console.log(`Servidor en ejecución en el puerto ${PORT}`);
