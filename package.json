@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node index.js",
-    "postinstall": "npm rebuild bcrypt --build-from-source"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
