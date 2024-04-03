@@ -24,43 +24,6 @@ const pool = new Pool({
     }
 });
 
-
-// Función para crear la tabla de usuarios
-async function createUsersTable() {
-    try {
-        const query = `
-            CREATE TABLE IF NOT EXISTS usuarios (
-                id SERIAL PRIMARY KEY,
-                nombre VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL UNIQUE,
-                contraseña VARCHAR(100) NOT NULL,
-                rol VARCHAR(20) NOT NULL DEFAULT 'usuario'
-            )
-        `;
-        await pool.query(query);
-        console.log('Tabla de usuarios creada correctamente');
-    } catch (error) {
-        console.error('Error al crear la tabla de usuarios:', error);
-    }
-}
-
-// Ejecutar la función para crear la tabla de usuarios al iniciar la aplicación
-createUsersTable()
-    .then(() => {
-        // Ahora puedes iniciar tu servidor una vez que la tabla se haya creado
-        app.listen(PORT, () => {
-            console.log(`Servidor en ejecución en el puerto ${PORT}`);
-        });
-    })
-    .catch(error => {
-        console.error('Error al configurar la base de datos:', error);
-        // Puedes decidir cómo manejar el error aquí
-    });
-
-
-
-
-
 app.use(express.json());
 app.use(cors());
 
